@@ -5,10 +5,12 @@ import numpy as np
 from scipy.ndimage import convolve
 from sklearn.decomposition import PCA
 from PIL import ImageOps
-
+import glob
 
 GAN = False
-INPUT_CHANNELS = "Nine"
+INPUT_CHANNELS = "One"
+img_height = 320
+img_width = 240
 
 class Surface_VUD(Dataset):
 
@@ -19,6 +21,7 @@ class Surface_VUD(Dataset):
         self.image_files = [f for f in os.listdir(path) if f.endswith(image_suffix)]
         self.transform = transform
         self.DYModel = DYModel
+        self.image_files_names = sorted(glob.glob(os.path.join(path, '*' + image_suffix)))
         
     
     def __len__(self):
@@ -52,8 +55,7 @@ class Surface_VUD(Dataset):
 
     def costume_test_phase_difference(self, img):
 
-        img_height = 320
-        img_width = 240
+        
         test_x = np.empty((1, img_height, img_width, 1), dtype="float32")
         img = img.crop((500, 50, 1400, 900))
         img_resized = img.resize((img_width, img_height))
@@ -131,20 +133,28 @@ class Surface_VUD(Dataset):
         # Load image
         image = Image.open(image_path).convert('L')
         
-        # image = self.transform(image)
-        wpx, wpy, img = self.costume_test_phase_difference(image)
-        img = np.array(img)
+        if INPUT_CHANNELS == "One":
+            
+            img = image.crop((500, 50, 1400, 900))
+            img_resized = img.resize((img_width, img_height))
+            img_array = np.array(img_resized, dtype=np.float32)
+            img_normalized = img_array / 255.0
+            img = np.array(img_normalized)
+            expanded_array = np.expand_dims(img, axis=0)
+            wpx_wpy_img = expanded_array
 
-        magnitude_img, direction_img = self.gradient(img)
-        magnitude_wpx, direction_wpx = self.gradient(wpx)
-        magnitude_wpy, direction_wpy = self.gradient(wpy)
+        else:
+            wpx, wpy, img = self.costume_test_phase_difference(image)
+            img = np.array(img)
+            magnitude_img, direction_img = self.gradient(img)
+            magnitude_wpx, direction_wpx = self.gradient(wpx)
+            magnitude_wpy, direction_wpy = self.gradient(wpy)
 
-        desired_size = (512, 256)  
-        zero_padded_images = []
-        padding = ((desired_size[0] - 320) // 2, (desired_size[1] - 240) // 2)
-
+        
         if GAN == True:
-                
+            desired_size = (512, 256)  
+            zero_padded_images = []
+            padding = ((desired_size[0] - 320) // 2, (desired_size[1] - 240) // 2)
             for image in (wpx, wpy, img, magnitude_img, direction_img, magnitude_wpx, direction_wpx, magnitude_wpy, direction_wpy):
                 
                 image = np.array(image)
@@ -158,8 +168,6 @@ class Surface_VUD(Dataset):
         else:
             if INPUT_CHANNELS == "Nine":
                 wpx_wpy_img = np.stack((wpx, wpy, img, magnitude_img, direction_img, magnitude_wpx, direction_wpx, magnitude_wpy, direction_wpy), axis=0)
-            elif INPUT_CHANNELS == "One":
-                wpx_wpy_img = img
             elif INPUT_CHANNELS == "Three":
                 wpx_wpy_img = np.stack((wpx, wpy, img), axis=0)
 
@@ -228,4 +236,7 @@ class Surface_VUD(Dataset):
             padded_array_2d = np.expand_dims(padded_array_2d, axis=-1)        
             transposed_array = np.expand_dims(transposed_array[:,:,2], axis=-1) # JUSTTTT for 1 input, remove for 9 channels plzzzzzzzz
             return transposed_array, padded_array_2d
-        return wpx_wpy_img, normalized_depthmap
+        
+        img_name = self.image_files_names[index]
+        identifier = os.path.basename(img_name)
+        return wpx_wpy_img, normalized_depthmap, identifier 

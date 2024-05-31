@@ -1,0 +1,37 @@
+RunTime:
+  Show_PLOT_RESULTS: True 
+  CALCULATE_THE_CRITERIA: True
+  SAVE_DEPTH_MAP_RESULTS: True
+  NPY_SAVE_PATH: "VUDNet/DEPTH"
+  Run_VAE: True 
+  Run_UNet: True
+  epoch_number: 1
+  fusion_epochs: 1
+  lr: 0.001
+  VISUALIZE_THE_DIST: True
+
+VUDNet:
+  lr: 0.001
+
+UNet:
+  lr: 0.001
+
+VAE:
+  epoch_number: 1
+  lr: 0.001
+
+DataLoader:
+  dataset_path: "U-Net/parabolic_concave" #'U-Net/2D_fringe_test',#"parabolic_concave", #
+  image_suffix: ".png"
+  depthMap_suffix: ".npz"
+  batch_size: 3
+  TrainSplit: 0.8
+  ValidationSplit: 0.1
+  DYNETPath: "./U-Net/DYnet++.h5"
+  Input_channel: 1
+
+
+ 
+ 
+ 
+    

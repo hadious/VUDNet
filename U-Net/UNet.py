@@ -1,23 +1,10 @@
 
-# -- Third-party modules -- #
+
 import torch
 
 skip_skip = True  
 
-options ={
-    # -- U-Net Options -- #
-    'unet_conv_filters': [16, 32, 64, 64],  # Number of filters in the U-Net.
-    'conv_kernel_size': (3, 3),  # Size of convolutional kernels.
-    'conv_stride_rate': (1, 1),  # Stride rate of convolutional kernels.
-    'conv_dilation_rate': (1, 1),  # Dilation rate of convolutional kernels.
-    'conv_padding': (1, 1),  # Number of padded pixels in convolutional layers.
-    'conv_padding_style': 'zeros',  # Style of padding.
-    'n_classes': 1 # Number of output channels
-}
-
-
 class UNet(torch.nn.Module):
-    """PyTorch U-Net Class. Uses unet_parts."""
 
     def __init__(self, options):
         super().__init__()

@@ -5,6 +5,7 @@ import numpy as np
 from scipy.ndimage import convolve
 from sklearn.decomposition import PCA
 from PIL import ImageOps
+import glob
 
 
 GAN = False
@@ -19,7 +20,7 @@ class Surface_Data(Dataset):
         self.image_files = [f for f in os.listdir(path) if f.endswith(image_suffix)]
         self.transform = transform
         self.DYModel = DYModel
-        
+        self.image_files_names = sorted(glob.glob(os.path.join(path, '*' + image_suffix)))
     
     def __len__(self):
          return len(self.image_files)
@@ -228,4 +229,7 @@ class Surface_Data(Dataset):
             padded_array_2d = np.expand_dims(padded_array_2d, axis=-1)        
             transposed_array = np.expand_dims(transposed_array[:,:,2], axis=-1) # JUSTTTT for 1 input, remove for 9 channels plzzzzzzzz
             return transposed_array, padded_array_2d
-        return wpx_wpy_img, normalized_depthmap
+        
+        img_name = self.image_files_names[index]
+        identifier = os.path.basename(img_name)
+        return wpx_wpy_img, normalized_depthmap,identifier

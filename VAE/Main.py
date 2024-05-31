@@ -23,7 +23,7 @@ print("GPU available:", tf.config.list_physical_devices('GPU'))
 torch.cuda.empty_cache()
 
 
-PLOT_FIG =  False
+PLOT_FIG =  True
 
 transform = transforms.Compose([
     transforms.ToTensor(),

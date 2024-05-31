@@ -1,4 +1,5 @@
 from Surface_VH import Surface_VH
+from Surface_VH_with_VAE import Surface_VH_with_VAE
 import argparse
 import torch
 from UNet import UNet
@@ -15,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from torch.utils.tensorboard import SummaryWriter
-
+import os
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -29,6 +30,65 @@ transform = transforms.Compose([
     # transforms.Resize((, )),
     transforms.Normalize(mean=[0.0], std=[0.5])
 ])
+
+def calculate_metrics(pred, truth):
+    # Flatten the arrays for simplicity in metric calculations
+    pred = pred.flatten()
+    truth = truth.flatten()
+    
+    mse = ((pred - truth) ** 2).mean()
+    mae = np.abs(pred - truth).mean()
+    rmse = np.sqrt(mse)
+    ard = np.mean(np.abs((pred - truth) / truth))
+    log_error = np.mean(np.abs(np.log10(pred + 1) - np.log10(truth + 1)))  # Added 1 to avoid log(0)
+    
+    return mse, mae, rmse, ard, log_error
+
+def test_model(model, test_loader, device, save_images=True):
+    model.eval()
+    test_metrics = {'MSE': [], 'MAE': [], 'RMSE': [], 'ARD': [], 'LogError': []}
+    with torch.no_grad():
+        for i, (images_test, depth_maps_test, identifiers) in enumerate(test_loader):
+            images_test, depth_maps_test = images_test.to(device), depth_maps_test.to(device)
+            recon_depth = model(images_test)
+
+            # Convert tensors to numpy arrays for image saving and metrics calculation
+            depth_maps_test_np = depth_maps_test.cpu().numpy()
+            recon_depth_np = recon_depth.cpu().numpy()
+            # import pdb
+            # pdb.set_trace()
+
+
+            # Calculate and store metrics
+            metrics = calculate_metrics(recon_depth_np, depth_maps_test_np)
+            test_metrics['MSE'].append(metrics[0])
+            test_metrics['MAE'].append(metrics[1])
+            test_metrics['RMSE'].append(metrics[2])
+            test_metrics['ARD'].append(metrics[3])
+            test_metrics['LogError'].append(metrics[4])
+
+            if save_images:
+                 for j, identifier in enumerate(identifiers):  # Iterate through batch
+                    # save_image(recon_depth_np[j].squeeze(), f'predicted_depth_map_{i}_{j}.png')
+                    # save_image(depth_maps_test_np[j].squeeze(), f'ground_truth_depth_map_{i}_{j}.png')
+                    file_name = f'PDU{identifier}.npy'
+                    file_path = os.path.join("U-Net/U_DEPTH", file_name)
+                    np.save(file_path, recon_depth_np[j].squeeze())
+
+    # Calculate average of all metrics
+    for key in test_metrics:
+        test_metrics[key] = np.mean(test_metrics[key])
+    return test_metrics
+
+
+
+def save_image(image, filename, path='SAVED_IMAGES'):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    plt.imshow(image, cmap='gray')
+    plt.axis('off')
+    plt.savefig(os.path.join(path, filename), bbox_inches='tight', pad_inches=0)
+    plt.close()
 
 def plot_depth_map_3d(depth_map):
         X, Y = np.meshgrid(np.arange(depth_map.shape[1]), np.arange(depth_map.shape[0]))
@@ -69,7 +129,7 @@ def Main():
     parser.add_argument(
         "--dataset_path",
         type=str ,
-        default= "parabolic_concave", #'2D_fringe_test',#"parabolic_concave",
+        default= "U-Net/parabolic_concave", #'2D_fringe_test',#"parabolic_concave",
         help="Dir to the dataset consisting of images and depthMap (in .npz format)"
     )
     parser.add_argument(
@@ -139,10 +199,10 @@ def Main():
 
 
     Kend.clear_session()
-    DYModel = load_model('./DYnet++.h5', custom_objects={"tf": tf})
+    DYModel = load_model('./U-Net/DYnet++.h5', custom_objects={"tf": tf})
 
 
-    dataset = Surface_VH(datset_path, image_suffix, depthMap_suffix, transform, DYModel)
+    dataset = Surface_VH_with_VAE(datset_path, image_suffix, depthMap_suffix, transform, DYModel)
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     # plot_images_from_loader(data_loader)
@@ -168,7 +228,7 @@ def Main():
     'conv_padding': (1, 1),  # Number of padded pixels in convolutional layers.
     'conv_padding_style': 'zeros',  # Style of padding.
     'n_classes': 1 ,# Number of output channels
-    'input_channels': 9 # we have two gray scale thingy, wpx and wpy (instead of RGB being channel 3) # now 9 :D
+    'input_channels': 3 # we have two gray scale thingy, wpx and wpy (instead of RGB being channel 3) # now 9 :D
     }
 
     model =   UNet(options).to(device) # NUNet().to(device) # UNet().to(device)
@@ -217,7 +277,7 @@ def Main():
     for epoch in range(num_epochs):
         running_loss = 0.0
         with tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs}', unit='batch') as t:
-            for i, (images, depth_maps) in enumerate(t):
+            for i, (images, depth_maps,_) in enumerate(t):
                 images, depth_maps = images.to(device), depth_maps.to(device).float()
                 optimizer.zero_grad()
                 outputs = model(images) 
@@ -255,7 +315,7 @@ def Main():
     model.eval()
     val_loss = 0.0
     with torch.no_grad():
-        for images_val, depth_maps_val in val_loader:
+        for images_val, depth_maps_val,_ in val_loader:
             images_val, depth_maps_val = images_val.to(device), depth_maps_val.to(device).float()
             outputs_val = model(images_val)
             loss_val = criterion(outputs_val, depth_maps_val)
@@ -266,7 +326,7 @@ def Main():
     model.eval()
     test_loss = 0.0
     with torch.no_grad():
-        for images_test, depth_maps_test in test_loader:
+        for images_test, depth_maps_test,_ in test_loader:
             images_test, depth_maps_test = images_test.to(device), depth_maps_test.to(device).float()
             outputs_test = model(images_test)
             loss_test = criterion(outputs_test, depth_maps_test)
@@ -281,7 +341,7 @@ def Main():
 
     # Iterate through the test set and get predictions
     with torch.no_grad():
-        for images_test, depth_maps_test in test_loader:
+        for images_test, depth_maps_test,_ in test_loader:
             images_test, depth_maps_test = images_test.to(device), depth_maps_test.to(device)
             outputs_test = model(images_test)
 
@@ -309,60 +369,62 @@ def Main():
                 plt.imshow(images_test_np[i][2], cmap='gray')
                 plt.title('image')
                 plt.axis('off')
-                plt.subplot(1, 12, 4)
-                plt.imshow(images_test_np[i][3], cmap='gray')
-                plt.title('magnitude_img')
-                plt.axis('off')
 
-                plt.subplot(1, 12, 5)
-                plt.imshow(images_test_np[i][4], cmap='gray')
-                plt.title('direction_img')
-                plt.axis('off')
+                # plt.subplot(1, 12, 4)
+                # plt.imshow(images_test_np[i][3], cmap='gray')
+                # plt.title('magnitude_img')
+                # plt.axis('off')
 
-                plt.subplot(1, 12, 6)
-                plt.imshow(images_test_np[i][5], cmap='gray')
-                plt.title('magnitude_wpx')
-                plt.axis('off')
+                # plt.subplot(1, 12, 5)
+                # plt.imshow(images_test_np[i][4], cmap='gray')
+                # plt.title('direction_img')
+                # plt.axis('off')
 
-                plt.subplot(1, 12, 7)
-                plt.imshow(images_test_np[i][6], cmap='gray')
-                plt.title('direction_wpx')
-                plt.axis('off')
+                # plt.subplot(1, 12, 6)
+                # plt.imshow(images_test_np[i][5], cmap='gray')
+                # plt.title('magnitude_wpx')
+                # plt.axis('off')
 
-                plt.subplot(1, 12, 8)
-                plt.imshow(images_test_np[i][7], cmap='gray')
-                plt.title('magnitude_wpy')
-                plt.axis('off')
+                # plt.subplot(1, 12, 7)
+                # plt.imshow(images_test_np[i][6], cmap='gray')
+                # plt.title('direction_wpx')
+                # plt.axis('off')
 
-                plt.subplot(1, 12, 9)
-                plt.imshow(images_test_np[i][8], cmap='gray')
-                plt.title('direction_wpy')
-                plt.axis('off')
+                # plt.subplot(1, 12, 8)
+                # plt.imshow(images_test_np[i][7], cmap='gray')
+                # plt.title('magnitude_wpy')
+                # plt.axis('off')
+
+                # plt.subplot(1, 12, 9)
+                # plt.imshow(images_test_np[i][8], cmap='gray')
+                # plt.title('direction_wpy')
+                # plt.axis('off')
 
 
-                plt.subplot(1, 12, 10)
-                plt.imshow(images_test_np[i][8], cmap='gray')
-                plt.title('Mere repeat')
-                plt.axis('off')
+                # plt.subplot(1, 12, 10)
+                # plt.imshow(images_test_np[i][8], cmap='gray')
+                # plt.title('Mere repeat')
+                # plt.axis('off')
 
-                # Plot ground truth depth map
-                plt.subplot(1, 12, 11)
-                plt.imshow(depth_maps_test_np[i].squeeze(), cmap='gray')
-                plt.title('Ground Truth')
-                plt.axis('off')
+                # # Plot ground truth depth map
+                # plt.subplot(1, 12, 11)
+                # plt.imshow(depth_maps_test_np[i].squeeze(), cmap='gray')
+                # plt.title('Ground Truth')
+                # plt.axis('off')
 
-                # Plot predicted depth map
-                plt.subplot(1, 12, 12)
-                plt.imshow(outputs_test_np[i].squeeze(), cmap='gray')
-                plt.title('Predicted')
-                plt.axis('off')
+                # # Plot predicted depth map
+                # plt.subplot(1, 12, 12)
+                # plt.imshow(outputs_test_np[i].squeeze(), cmap='gray')
+                # plt.title('Predicted')
+                # plt.axis('off')
 
                 plt.show()
                 
                 plot_depth_map_3d(depth_maps_test_np[i].squeeze())
                 plot_depth_map_3d(outputs_test_np[i].squeeze())
                 
-
+    metrics = test_model(model, test_loader, device)
+    print(metrics)
 
 Main()
  
