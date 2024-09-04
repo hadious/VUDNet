@@ -11,16 +11,6 @@ Key Features:
 This project sets a new standard for single-shot deflectometry, demonstrating the potential of deep learning in advancing optical metrology for specular surfaces.
 
 
-## Table of Contents
-
-- [Installation](#installation)
-- [Usage](#usage)
-- [Features](#features)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
-
-
 ## Installation
 
 1. **Clone the Repository:**
@@ -42,4 +32,9 @@ This project sets a new standard for single-shot deflectometry, demonstrating th
      ```
 
 4. **Additional Setup:**
-   - For the data generation we have used blender, for that, the scripts codes are put in this repo.
+   - For the data generation we have used blender, for that, the scripts codes are put in this repo as well as an example of the blender file.
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
