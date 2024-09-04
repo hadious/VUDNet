@@ -6,6 +6,40 @@ Key Features:
 
 - Hybrid Architecture: Integrates a VAE for coarse depth estimation and a modified U-Net for fine detail refinement, ensuring high accuracy and generalization.
 - Single-Shot Deflectometry: Captures complex surface geometries from single-shot 2D images, optimizing the reconstruction process for dynamic and real-time applications.
-- Extensive Data Simulation: Uses Blender's Cycles engine to simulate a diverse dataset of specular surfaces, enhancing the network's robustness and applicability to real-world scenarios.
+- Data Simulation: Uses Blender's Cycles engine to simulate a diverse dataset of specular surfaces, enhancing the network's robustness and applicability to real-world scenarios.
 
 This project sets a new standard for single-shot deflectometry, demonstrating the potential of deep learning in advancing optical metrology for specular surfaces.
+
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
+
+## Installation
+
+1. **Clone the Repository:**
+   - Open your terminal and run the following command to clone the repository:
+     ```bash
+     git clone https://github.com/your-username/your-project-name.git    
+     ```
+
+2. **Navigate to the Project Directory:**
+   - Change into the directory of the cloned repository:
+     ```bash
+     cd your-project-name
+     ```
+
+3. **Install Dependencies:**
+   - You can find the list of dependencies in the `requirements.txt` file, which is typically used for Python projects. To install these dependencies, run:
+     ```bash
+     pip install -r requirements.txt
+     ```
+
+4. **Additional Setup:**
+   - For the data generation we have used blender, for that, the scripts codes are put in this repo.
