@@ -5,3 +5,5 @@ U-Net/training_checkpoints
 U-Net/runs
 *.h5
 *.mat
+*.npy
+*.pth

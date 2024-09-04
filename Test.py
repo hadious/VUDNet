@@ -157,7 +157,7 @@ difference = matrix_npy - normalized_depthmap
 plt.figure(figsize=(10, 8))
 plt.imshow(difference, cmap='coolwarm', interpolation='nearest')
 plt.colorbar()
-plt.title('Heatmap of Matrix Difference')
+# plt.title('Heatmap of Matrix Difference')
 plt.xlabel('X axis')
 plt.ylabel('Y axis')
 plt.show()

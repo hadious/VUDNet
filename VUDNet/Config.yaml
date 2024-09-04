@@ -5,10 +5,14 @@ RunTime:
   NPY_SAVE_PATH: "VUDNet/DEPTH"
   Run_VAE: True 
   Run_UNet: True
-  epoch_number: 1
-  fusion_epochs: 1
+  epoch_number: 100
+  fusion_epochs: 25
   lr: 0.001
-  VISUALIZE_THE_DIST: True
+  VISUALIZE_THE_DIST: False
+  SAVE_THE_MODELS: False
+  RUN_FROM_SAVED_MODELS: True
+  DO_THE_TEST: True
+
 
 VUDNet:
   lr: 0.001
@@ -21,7 +25,7 @@ VAE:
   lr: 0.001
 
 DataLoader:
-  dataset_path: "U-Net/parabolic_concave" #'U-Net/2D_fringe_test',#"parabolic_concave", #
+  dataset_path: "U-Net/2D_fringe_test" #'U-Net/2D_fringe_test',#"parabolic_concave", #
   image_suffix: ".png"
   depthMap_suffix: ".npz"
   batch_size: 3
