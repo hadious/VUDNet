@@ -4,8 +4,8 @@ This project implements VUDNet, a novel deep neural network designed for the end
 
 Key Features:
 
-    Hybrid Architecture: Integrates a VAE for coarse depth estimation and a modified U-Net for fine detail refinement, ensuring high accuracy and generalization.
-    Single-Shot Deflectometry: Captures complex surface geometries from single-shot 2D images, optimizing the reconstruction process for dynamic and real-time applications.
-    Extensive Data Simulation: Uses Blender's Cycles engine to simulate a diverse dataset of specular surfaces, enhancing the network's robustness and applicability to real-world scenarios.
+- Hybrid Architecture: Integrates a VAE for coarse depth estimation and a modified U-Net for fine detail refinement, ensuring high accuracy and generalization.
+- Single-Shot Deflectometry: Captures complex surface geometries from single-shot 2D images, optimizing the reconstruction process for dynamic and real-time applications.
+- Extensive Data Simulation: Uses Blender's Cycles engine to simulate a diverse dataset of specular surfaces, enhancing the network's robustness and applicability to real-world scenarios.
 
 This project sets a new standard for single-shot deflectometry, demonstrating the potential of deep learning in advancing optical metrology for specular surfaces.
