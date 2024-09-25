@@ -13,7 +13,7 @@ You can find more details in the accompanying [pre-print paper](https://www.prep
 ## Architecture
 Below is the architecture diagram of VUDNet, showing the integration of the VAE and U-Net for 3D surface reconstruction:
 
-![VUDNet Architecture]()
+![VUDNet Architecture](Final_arch.pdf)
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
