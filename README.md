@@ -18,7 +18,7 @@ Below is the architecture diagram of VUDNet, showing the integration of the VAE 
 ## Installation
 To install the required dependencies for this project, use the `requirements.txt` file. You can install the dependencies by running the following command:
 
-pip install -r requirements.txt
+  pip install -r requirements.txt
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
