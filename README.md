@@ -11,7 +11,7 @@ This repository contains the implementation of VUDNet, a novel deep neural netwo
 You can find more details in the accompanying [pre-print paper](https://www.preprints.org/manuscript/202409.1851/v1).
 
 ## Architecture
-Below is the architecture diagram of VUDNet, showing the integration of the VAE and U-Net for 3D surface reconstruction:
+Below is the architecture diagram of VUDNet, showing the integration of the VAE and U-Net for 3D surface reconstruction of specular surfaces:
 
 ![VUDNet Architecture](VUDNet_Arch.jpg)
 
