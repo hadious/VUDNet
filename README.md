@@ -8,7 +8,7 @@ This repository contains the implementation of VUDNet, a novel deep neural netwo
 - **Extensive Simulation Dataset**: The project includes a dataset generated using Blender, capturing diverse deformed surfaces and their depth maps.
 
 ## Paper
-You can find more details in the accompanying [paper]([https://www.preprints.org/manuscript/202409.1851/v1](https://www.mdpi.com/2076-3417/14/23/10824)]).
+You can find more details in the accompanying [paper](https://www.preprints.org/manuscript/202409.1851/v1](https://www.mdpi.com/2076-3417/14/23/10824)).
 
 ## Architecture
 Below is the architecture diagram of VUDNet, showing the integration of the VAE and U-Net for 3D surface reconstruction of specular surfaces:
